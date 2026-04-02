@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Ravdina Room Quest · найди все предметы</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: linear-gradient(145deg, #1a1a2e 0%, #0f0f1a 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
+            padding: 12px;
+        }
+
+        /* контейнер уменьшен ещё на 15% (от предыдущего размера) */
+        .quest-container {
+            max-width: 795px;  /* было 935px, уменьшено на 15% */
+            width: 100%;
+            background: #2c241a;
+            border-radius: 35px;
+            padding: 16px;
+            box-shadow: 0 30px 50px rgba(0,0,0,0.6);
+            border: 1px solid #5e4b38;
+        }
+
+        .quest-header {
+            background: #1e1914;
+            border-radius: 28px;
+            padding: 12px 20px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .title-section h1 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #ffecd6;
+            text-shadow: 2px 2px 0 #6b4c2c;
+            letter-spacing: 1px;
+        }
+
+        .title-section p {
+            color: #c9aa82;
+            font-size: 0.7rem;
+            margin-top: 3px;
+        }
+
+        .counter-section {
+            background: #0c0a08;
+            padding: 6px 22px;
+            border-radius: 40px;
+            text-align: center;
+            border: 2px solid #c28a4e;
+            box-shadow: inset 0 -3px 0 #000;
+        }
+
+        .counter-number {
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: #ffb347;
+            line-height: 1;
+        }
+
+        .counter-label {
+            font-size: 0.6rem;
+            color: #bda07a;
+            letter-spacing: 2px;
+        }
+
+        .image-area {
+            background: #1a1510;
+            border-radius: 28px;
+            padding: 10px;
+            margin-bottom: 16px;
+            box-shadow: inset 0 0 0 3px #4a3a2a, 0 15px 25px black;
+        }
+
+        .image-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+            border-radius: 22px;
+            overflow: hidden;
+        }
+
+        #questCanvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            border-radius: 18px;
+            cursor: crosshair;
+            box-shadow: 0 0 0 3px #d4a373;
+            transition: filter 0.2s;
+        }
+
+        .message-panel {
+            background: #1e1914;
+            border-radius: 24px;
+            padding: 12px 18px;
+            margin-bottom: 16px;
+            border-left: 6px solid #d48d4b;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+        }
+
+        .quest-message {
+            color: #f5e2ca;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            min-height: 55px;
+            word-break: break-word;
+        }
+
+        .audio-block {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+            background: #16110c;
+            padding: 8px 15px;
+            border-radius: 35px;
+        }
+
+        .audio-badge {
+            background: #7a532f;
+            color: #fff0db;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            border: 2px solid #daa268;
+        }
+
+        audio {
+            flex: 2;
+            min-width: 180px;
+            height: 36px;
+            border-radius: 30px;
+            background: #2d241b;
+            filter: brightness(1.1);
+        }
+
+        .win-block {
+            background: #3e2d1d;
+            border: 3px solid #ffaa44;
+            border-radius: 40px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            box-shadow: 0 8px 0 #4a2e18;
+        }
+
+        .win-text {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #fff1d6;
+            text-shadow: 2px 2px 0 #b45a2a;
+        }
+
+        .album-link {
+            background: #c97c3b;
+            color: white;
+            text-decoration: none;
+            padding: 8px 24px;
+            border-radius: 35px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: 3px solid #ffc285;
+            box-shadow: 4px 4px 0 #4f321d;
+            transition: 0.1s ease;
+            display: inline-block;
+        }
+
+        .album-link:hover {
+            background: #e08b45;
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #4f321d;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 12px;
+            color: #7e694f;
+            font-size: 0.65rem;
+        }
+    </style>
+</head>
+<body>
+<div class="quest-container">
+    <div class="quest-header">
+        <div class="title-section">
+            <h1>⚡ RAVDINA · ROOM QUEST ⚡</h1>
+            <p>найди все предметы · открой альбом</p>
+        </div>
+        <div class="counter-section">
+            <div class="counter-number" id="counterValue">0</div>
+            <div class="counter-label">/ 13 находок</div>
+        </div>
+    </div>
+
+    <div class="image-area">
+        <div class="image-wrapper">
+            <canvas id="questCanvas" width="1000" height="1000"></canvas>
+        </div>
+    </div>
+
+    <div class="message-panel">
+        <div class="quest-message" id="messageBox">
+            🎸 кликай по предметам в комнате · найди всё!
+        </div>
+    </div>
+
+    <div class="audio-block">
+        <span class="audio-badge">🎧 звуки комнаты</span>
+        <audio id="audioPlayer" controls controlsList="nodownload">
+            <source src="#" type="audio/mpeg">
+        </audio>
+    </div>
+
+    <div id="winBlock" class="win-block hidden">
+        <span class="win-text">✨ ПОЛНАЯ КОЛЛЕКЦИЯ! ✨</span>
+        <a href="#" class="album-link" target="_blank">▶ АЛЬБОМ «RAVDINA ROOM»</a>
+    </div>
+    <div class="footer-note">
+        🔍 исследуй каждый угол · кликай на гитару, постеры, технику
+    </div>
+</div>
+
+<script>
+    (function() {
+        const imageUrl = "https://raw.githubusercontent.com/steeldeath152/RVDN_room/refs/heads/main/IMG_5223.PNG";
+        
+        // ----- АУДИО ДЛЯ РАЗНЫХ ПРЕДМЕТОВ (замените ссылки на свои) -----
+        const AUDIO_FILES = {
+            guitar: "https://raw.githubusercontent.com/steeldeath152/RVDN_room/refs/heads/main/riff_serdce.mp3",   // звук гитары
+            tv: "https://raw.githubusercontent.com/steeldeath152/RVDN_room/refs/heads/main/synth_lunatiki.mp3",       // звук телевизора
+            notebook: "https://raw.githubusercontent.com/steeldeath152/RVDN_room/refs/heads/main/intro_MB-001.mp3", // звук ноутбука
+            win: "https://raw.githubusercontent.com/steeldeath152/RVDN_room/refs/heads/main/synth_serdce.mp3"       // победный звук
+        };
+        
+        // ФИНАЛЬНЫЕ КООРДИНАТЫ (все предметы)
+        const items = [
+            { id: "guitar",      name: "Гитара",          x: 635, y: 380, w: 100, h: 280, text: "🎸 Электрогитара. Поцарапанный корпус, но звучит как мечта. На ремне логотип Ravdina.", audioKey: "guitar" },
+            { id: "lamp",        name: "Светильник RVDN", x: 430, y: 380, w: 200, h: 100, text: "💡 Светильник RVDN. Мягкий тёплый свет, в темноте создаёт уют.", audioKey: null },
+            { id: "notebook",    name: "Ноутбук",         x: 215, y: 380, w: 150, h: 100, text: "💻 Ноутбук. На экране — сведение нового альбома. Открыт секвенсор.", audioKey: "notebook" },
+            { id: "tv",          name: "Телевизор",       x: 960, y: 455, w: 230, h: 125, text: "📺 Старый телевизор. По нему часто смотрят клипы 90-х и 00-х.", audioKey: "tv" },
+            { id: "console",     name: "Игровая приставка", x: 1005, y: 720, w: 130, h: 100, text: "🎮 Игровая приставка. Рядом два джойстика и куча пиратских картриджей.", audioKey: null },
+            { id: "bonsai",      name: "Мёртвый бонсай",  x: 1070, y: 870, w: 130, h: 180, text: "🌿 Мёртвый бонсай. Когда-то был живым, теперь — символ творческого кризиса.", audioKey: null },
+            { id: "magazine",    name: "Журнал",          x: 665, y: 820, w: 100, h: 100, text: "📓 Старый рок-журнал. На обложке — интервью с любимой группой.", audioKey: null },
+            { id: "blanket",     name: "Плед Ravdina",    x: 479, y: 1080, w: 130, h: 130, text: "🛋 Плед с логотипом Ravdina. Мягкий, тёплый, пахнет домом.", audioKey: null },
+            { id: "poster1",     name: "Постер 1",        x: 215, y: 40, w: 150, h: 290, text: "🖼 Постер культовой группы. Края потрёпаны, скотч держится на честном слове.", audioKey: null },
+            { id: "poster2",     name: "Постер 2",        x: 420, y: 40, w: 140, h: 280, text: "🖼 Большой постер. На нём автографы, собранные на концертах.", audioKey: null },
+            { id: "poster3",     name: "Постер 3",        x: 655, y: 200, w: 150, h: 150, text: "🖼 Винтажный постер. Редкое издание, память о первом фестивале.", audioKey: null },
+            { id: "poster4",     name: "Постер 4",        x: 1000, y: 50, w: 200, h: 300, text: "🖼 Огромный постер во всю стену. Любимая группа, вдохновляющая на музыку.", audioKey: null },
+            { id: "poster5",     name: "Постер 5",        x: 840, y: 290, w: 85, h: 100, text: "🖼 Постер с автографом. Подарок от друзей на день рождения.", audioKey: null }
+        ];
+
+        let found = new Array(items.length).fill(false);
+        let foundCount = 0;
+        const total = items.length;
+
+        const canvas = document.getElementById('questCanvas');
+        const ctx = canvas.getContext('2d');
+        const msgBox = document.getElementById('messageBox');
+        const counterSpan = document.getElementById('counterValue');
+        const winDiv = document.getElementById('winBlock');
+        const audioPlayer = document.getElementById('audioPlayer');
+
+        const bgImage = new Image();
+        bgImage.crossOrigin = "Anonymous";
+        
+        bgImage.onload = function() {
+            canvas.width = bgImage.width;
+            canvas.height = bgImage.height;
+            ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+            msgBox.innerText = "✅ Изображение загружено! Кликай на предметы.";
+        };
+        
+        bgImage.onerror = function() {
+            msgBox.innerText = "❌ Ошибка загрузки фоновой картинки. Проверьте соединение.";
+            ctx.fillStyle = "#2d2418";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "20px sans-serif";
+            ctx.fillText("Не удалось загрузить изображение комнаты", 200, 500);
+        };
+        
+        bgImage.src = imageUrl;
+
+        function updateGameUI() {
+            counterSpan.innerText = foundCount;
+            if (foundCount === total) {
+                winDiv.classList.remove('hidden');
+                msgBox.innerText = "🏆 ПОЗДРАВЛЯЮ! Ты нашёл все 13 предметов! Теперь слушай альбом Ravdina 🏆";
+                if (audioPlayer.src !== AUDIO_FILES.win) {
+                    audioPlayer.src = AUDIO_FILES.win;
+                    audioPlayer.play().catch(e => console.log("autoplay blocked"));
+                }
+            } else {
+                winDiv.classList.add('hidden');
+            }
+        }
+
+        function playSound(audioKey) {
+            if (audioKey && AUDIO_FILES[audioKey]) {
+                audioPlayer.src = AUDIO_FILES[audioKey];
+                audioPlayer.play().catch(e => console.log("audio play error"));
+            }
+        }
+
+        function onItemClick(index) {
+            if (found[index]) {
+                msgBox.innerText = `🔁 ${items[index].name} уже найден(а). Ищи дальше!`;
+                return;
+            }
+            found[index] = true;
+            foundCount++;
+            const item = items[index];
+            msgBox.innerText = `🔍 ${item.name}: ${item.text}`;
+            
+            // воспроизводим звук, если у предмета есть audioKey
+            if (item.audioKey) {
+                playSound(item.audioKey);
+            }
+            
+            updateGameUI();
+            if (bgImage.complete) {
+                ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        function handleCanvasClick(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            let mouseX = (e.clientX - rect.left) * scaleX;
+            let mouseY = (e.clientY - rect.top) * scaleY;
+            
+            mouseX = Math.max(0, Math.min(canvas.width, mouseX));
+            mouseY = Math.max(0, Math.min(canvas.height, mouseY));
+            
+            for (let i = 0; i < items.length; i++) {
+                const it = items[i];
+                if (mouseX >= it.x && mouseX <= it.x + it.w && mouseY >= it.y && mouseY <= it.y + it.h) {
+                    onItemClick(i);
+                    return;
+                }
+            }
+            msgBox.innerText = "❌ Мимо! Попробуй кликнуть на гитару, постер, телевизор или другие предметы.";
+        }
+
+        function onCanvasMouseMove(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            let mouseX = (e.clientX - rect.left) * scaleX;
+            let mouseY = (e.clientY - rect.top) * scaleY;
+            
+            let hover = false;
+            for (let it of items) {
+                if (mouseX >= it.x && mouseX <= it.x + it.w && mouseY >= it.y && mouseY <= it.y + it.h) {
+                    hover = true;
+                    break;
+                }
+            }
+            canvas.style.cursor = hover ? 'pointer' : 'crosshair';
+        }
+
+        canvas.addEventListener('click', handleCanvasClick);
+        canvas.addEventListener('mousemove', onCanvasMouseMove);
+        
+        updateGameUI();
+        
+        if (bgImage.complete) {
+            canvas.width = bgImage.width;
+            canvas.height = bgImage.height;
+            ctx.drawImage(bgImage, 0, 0);
+        }
+        
+        const albumLinkElement = document.querySelector('.album-link');
+        if (albumLinkElement) {
+            albumLinkElement.href = "https://band.link/rvdn_komnata";
+        }
+    })();
+</script>
+</body>
+</html>
